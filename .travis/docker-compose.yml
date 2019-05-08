@@ -1,17 +1,31 @@
 version: "2"
 
 services:
-  mariadb:
-    image: wodby/mariadb:$MARIADB_TAG
-    container_name: "${PROJECT_NAME}_mariadb"
-    stop_grace_period: 30s
+  db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5432:5432
     environment:
-      MYSQL_ROOT_PASSWORD: $DB_ROOT_PASSWORD
-      MYSQL_DATABASE: $DB_NAME
-      MYSQL_USER: $DB_USER
-      MYSQL_PASSWORD: $DB_PASSWORD
+      POSTGRES_PASSWORD: 'postgres'
     volumes:
-      - ./mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
+      - database_data:/var/lib/postgresql/data
+
+  api:
+    build: ./api
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    volumes:
+      - ./api:/usr/src/app/
+    links:
+      - db
+    environment:
+      - PGHOST: 'db'
+      - PGDATABASE: 'postgres'
+      - PGUSER: 'postgres'
+      - PGPASSWORD: 'postgres'
 
   php:
     image: wodby/drupal-php:$PHP_TAG

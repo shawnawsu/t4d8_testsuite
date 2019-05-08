@@ -60,8 +60,8 @@ class RoboFile extends \Robo\Tasks
         return $this->taskExecStack()
             ->stopOnFail()
             ->exec('vendor/bin/phpcs --config-set installed_paths vendor/drupal/coder/coder_sniffer')
-            ->exec('vendor/bin/phpcs --standard=Drupal web/modules/custom')
-            ->exec('vendor/bin/phpcs --standard=DrupalPractice web/modules/custom')
+            ->exec('vendor/bin/phpcs --standard=Drupal html/modules/custom')
+            ->exec('vendor/bin/phpcs --standard=DrupalPractice html/modules/custom')
             ->run();
     }
 
@@ -92,9 +92,9 @@ class RoboFile extends \Robo\Tasks
     {
         $tasks = [];
         $tasks[] = $this->taskFilesystemStack()
-            ->mkdir('mariadb-init');
+            ->mkdir('postgres-init');
         $tasks[] = $this->taskExec('wget ' . getenv('DB_DUMP_URL'))
-            ->dir('mariadb-init');
+            ->dir('postgres-init');
         return $tasks;
     }
 
@@ -113,7 +113,7 @@ class RoboFile extends \Robo\Tasks
             ->copy('.travis/traefik.yml', 'traefik.yml', $force)
             ->copy('.travis/.env', '.env', $force)
             ->copy('.travis/config/settings.local.php',
-                'web/sites/default/settings.local.php', $force)
+                'html/sites/default/settings.local.php', $force)
             ->copy('.travis/config/behat.yml', 'tests/behat.yml', $force);
 
         $tasks[] = $this->taskExec('docker-compose pull --parallel');
@@ -176,7 +176,7 @@ class RoboFile extends \Robo\Tasks
     protected function startWebServer()
     {
         $tasks = [];
-        $tasks[] = $this->taskExec('vendor/bin/drush --root=' . $this->getDocroot() . '/web runserver ' . static::DRUPAL_URL . ' &')
+        $tasks[] = $this->taskExec('vendor/bin/drush --root=' . $this->getDocroot() . '/html runserver ' . static::DRUPAL_URL . ' &')
             ->silent(true);
         $tasks[] = $this->taskExec('until curl -s ' . static::DRUPAL_URL . '; do true; done > /dev/null');
         return $tasks;
@@ -193,9 +193,9 @@ class RoboFile extends \Robo\Tasks
         $force = true;
         $tasks = [];
         $tasks[] = $this->taskFilesystemStack()
-            ->copy('.travis/config/phpunit.xml', 'web/core/phpunit.xml', $force);
+            ->copy('.travis/config/phpunit.xml', 'html/core/phpunit.xml', $force);
         $tasks[] = $this->taskExecStack()
-            ->dir('web')
+            ->dir('html')
             ->exec('../vendor/bin/phpunit -c core --debug --coverage-clover ../build/logs/clover.xml --verbose modules/custom');
         return $tasks;
     }
@@ -223,7 +223,7 @@ class RoboFile extends \Robo\Tasks
     protected function drush()
     {
         // Drush needs an absolute path to the docroot.
-        $docroot = $this->getDocroot() . '/web';
+        $docroot = $this->getDocroot() . '/html';
         return $this->taskExec('vendor/bin/drush')
             ->option('root', $docroot, '=');
     }
