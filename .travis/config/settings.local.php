@@ -7,6 +7,6 @@ $databases['default']['default'] = array (
   'prefix' => '',
   'host' => 'postgres',
   'port' => '',
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\pgsql',
+  'driver' => 'pgsql',
 );
