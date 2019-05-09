@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Contains tripal.module..
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function tripal_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the tripal module.
+    case 'help.page.tripal':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Tripal is a toolkit to facilitate construction of online genomic, genetic (and other biological) websites.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function tripal_theme() {
+  $theme = [];
+  $theme['tripal_entity'] = array(
+    'render element' => 'elements',
+    'file' => 'tripal_entity.page.inc',
+    'template' => 'tripal_entity',
+  );
+  $theme['tripal_entity_content_add_list'] = [
+    'render element' => 'content',
+    'variables' => ['content' => NULL],
+    'file' => 'tripal_entity.page.inc',
+  ];
+  return $theme;
+}
+
+/**
+* Implements hook_theme_suggestions_HOOK().
+*/
+function tripal_theme_suggestions_tripal_entity(array $variables) {
+  $suggestions = array();
+  $entity = $variables['elements']['#tripal_entity'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'tripal_entity__' . $sanitized_view_mode;
+  $suggestions[] = 'tripal_entity__' . $entity->bundle();
+  $suggestions[] = 'tripal_entity__' . $entity->bundle() . '__' . $sanitized_view_mode;
+  $suggestions[] = 'tripal_entity__' . $entity->id();
+  $suggestions[] = 'tripal_entity__' . $entity->id() . '__' . $sanitized_view_mode;
+  return $suggestions;
+}
+
